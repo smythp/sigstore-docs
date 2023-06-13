@@ -18,9 +18,9 @@ Sigstore's root of trust, which includes Fulcio's root CA certificate and Rekor'
 
 ## Identity Tokens
 
-Cosign supports two OAuth flows today: the standard flow and the device flow.
+Currently, Cosign supports two OAuth flows: the standard flow and the device flow.
 
-When there is no terminal attached (non-interactive mode), Cosign will automatically use the device flow where a link is printed to stdout. This link must be opened in a browser to complete the flow.
+When there is no terminal attached (non-interactive mode), Cosign will automatically use the device flow in which a link is printed to stdout. This link must be opened in a browser to complete the flow.
 
 In automated environments, Cosign also supports directly using OIDC Identity Tokens from specific issuers. These can be supplied on the command line with the `--identity-token` flag. The `audiences` claim in the token must contain `sigstore`.
 
@@ -28,8 +28,8 @@ In automated environments, Cosign also supports directly using OIDC Identity Tok
 
 To log in and set up your OIDC Identity, follow these steps:
 
-1. Follow the link that Cosign provides to the Issuer login page.
-2. Log in to one of the supported systems that is shown:
+1. Follow the link that Cosign provides to the Issuer login page. If you are using Cosign interactively, a browser window should automatically open after agreeing to Cosign's terms. When using Cosign non-interactively, the link will be printed to stdout.
+2. Log in to one of the supported systems that are shown:
 ![Identity Sign-in](/cosign_identity_login.png)
 3. Go back to your terminal or other application. Redirection back to Cosign is seamless.
 
@@ -41,9 +41,9 @@ Identity-based signing is the default because managing and distributing keys is 
 
 #### Verifying identity and signing the artifact
 
-1) An in-memory public/private keypair is created. 
+1) An in-memory public/private keypair is created.
 2) The identity token is retrieved.
-3) Sigstore's certificate authority verifies the identity token of the user signing the artifact and issues a certificate attesting to their identity. The identity is bound to the public key. Decrypting with the public key will prove the identity of the private keyholder. 
+3) Sigstore's certificate authority verifies the identity token of the user signing the artifact and issues a certificate attesting to their identity. The identity is bound to the public key. Decrypting with the public key will prove the identity of the private keyholder.
 4) For security, the private key is destroyed shortly after and the short-lived identity certificate expires. Users who wish to verify the software will use the transparency log entry, rather than relying on the signer to safely store and manage the private key.
 
 #### Recording signing event
@@ -52,7 +52,7 @@ To create the transparency log entry, a Sigstore client creates an object contai
 
 #### Verifying the signed artifact
 
-When a software consumer wants to verify the software’s signature, Sigstore compares a tuple of signature, key/certificate, and artifact from the timestamped object against the timestamped Rekor entry. If they match, it confirms that the signature is valid because the user knows that the expected software creator, whose identity was certified at the moment of signing, published the software artifact in their possession. The entry in the Rekor’s immutable transparency log means that the signer will be monitoring the log for occurrences of their identity and will know if there is an unexpected signing event. 
+When a software consumer wants to verify the software’s signature, Sigstore compares a tuple of signature, key/certificate, and artifact from the timestamped object against the timestamped Rekor entry. If they match, it confirms that the signature is valid because the user knows that the expected software creator, whose identity was certified at the moment of signing, published the software artifact in their possession. The entry in the Rekor’s immutable transparency log means that the signer will be monitoring the log for occurrences of their identity and will know if there is an unexpected signing event.
 
 ### On Google Cloud Platform
 
@@ -60,20 +60,20 @@ From a Google Cloud Engine (GCE) virtual machine, you can use the VM's service a
 
 ```shell
 $ cosign sign --identity-token=$(
-    gcloud auth print-identity-token \
-        --audiences=sigstore) \
-    gcr.io/user-vmtest2/demo
+	gcloud auth print-identity-token \
+		--audiences=sigstore) \
+	gcr.io/user-vmtest2/demo
 ```
 
 From outside a GCE VM, you can impersonate a GCP IAM service account to sign an image:
 
 ```shell
 $ cosign sign --identity-token=$(
-    gcloud auth print-identity-token \
-        --audiences=sigstore \
-        --include-email \
-        --impersonate-service-account my-sa@my-project.iam.gserviceaccount.com) \
-    gcr.io/user-vmtest2/demo
+	gcloud auth print-identity-token \
+		--audiences=sigstore \
+		--include-email \
+		--impersonate-service-account my-sa@my-project.iam.gserviceaccount.com) \
+	gcr.io/user-vmtest2/demo
 ```
 
 In order to impersonate an IAM service account, your account must have the `roles/iam.serviceAccountTokenCreator` role.
@@ -91,14 +91,12 @@ If you're running your own sigtore services flags are available to set your own 
 
 ```
  cosign sign --oidc-issuer "https://oauth2.example.com/auth" \
-                        --fulcio-url "https://fulcio.example.com" \
-                        --rekor-url "https://rekor.example.com"  \
-                        ghcr.io/jdoe/somerepo/testcosign
+						--fulcio-url "https://fulcio.example.com" \
+						--rekor-url "https://rekor.example.com"  \
+						ghcr.io/jdoe/somerepo/testcosign
 
 ```
 
 ### Custom roots of trust
 
 For information on custom roots of trust, see [Configuring Cosign with Custom Components](/cosign/custom_components/).
-
-
